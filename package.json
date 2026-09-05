@@ -2,9 +2,10 @@
   "name": "@genseam/asl-agent-core",
   "version": "0.3.0",
   "description": "AgentScript Unified Agent Core: composable onion middleware, capability negotiator, event bus, and execution pipeline",
+  "type": "module",
   "main": "src/core.asl",
   "scripts": {
-    "test": "python3 ../../tools/test_runner.py tests/"
+    "test": "node ../asl/bin/asl gate src/core.asl tests/fsm_test.asl tests/onion_test.asl tests/toolcall_test.asl"
   },
   "dependencies": {
     "@genseam/asl-mem": "^0.3.0"
