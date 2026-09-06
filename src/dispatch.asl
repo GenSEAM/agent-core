@@ -1,6 +1,6 @@
 (module asl-agent-core/dispatch
   :d "Zero-JSON tool dispatcher and validation engine for AgentScript S-expressions."
-  :x [ToolRegistry register-tool find-tool check-required-params validate-invocation execute-mock-tool dispatch-call]
+  :x [ToolRegistry register-tool find-tool check-required-params validate-invocation execute-mock-tool dispatch-call dispatch-batch-calls]
   :i [(protocol :a proto)])
 
 (dfs ToolRegistry
@@ -100,3 +100,7 @@
        ((ok valid-inv)
         (let [(res (execute-mock-tool valid-inv))]
           (proto/format-result res)))))))
+
+(df dispatch-batch-calls [(reg ToolRegistry) (calls (List Str))] -> (List Str)
+  :d "Executes a sequence of ASL S-expression tool calls in order, returning formatted results."
+  (map (fn [(raw-call Str)] -> Str (dispatch-call reg raw-call)) calls))

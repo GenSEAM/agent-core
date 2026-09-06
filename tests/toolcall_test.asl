@@ -72,10 +72,21 @@
     (and (string-contains? out "(result :tool search :ok false")
          (string-contains? out "Missing required argument: q"))))
 
+(df test-dispatch-batch [] -> Bool
+  :d "Verifies batch execution of multiple tool calls."
+  (let [(reg (sample-registry))
+        (calls (list "(call :tool search :q \"lang\" :limit 2)"
+                     "(call :tool fetch :url \"https://asl.dev\")"))
+        (results (disp/dispatch-batch-calls reg calls))]
+    (and (= (list-length results) 2)
+         (and (string-contains? (option-or (list-head results) "") "(result :tool search :ok true")
+              (string-contains? (option-or (list-head (list-tail results)) "") "(result :tool fetch :ok true")))))
+
 (df run-tests [] -> Bool
   :d "Runs all asl-toolcall unit tests."
   (and (test-format-tool-def)
        (and (test-parse-invocation)
             (and (test-validate-invocation)
                  (and (test-dispatch-call)
-                      (test-dispatch-error))))))
+                      (and (test-dispatch-error)
+                           (test-dispatch-batch)))))))

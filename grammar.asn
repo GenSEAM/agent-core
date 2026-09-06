@@ -58,6 +58,8 @@
           :rationale "Validates parameter schema conformance of incoming tool call")
     (:sym :name "dispatch-call" :kind :fn :tokens 2
           :rationale "Dispatches validated tool invocation to corresponding execution handler")
+    (:sym :name "dispatch-batch-calls" :kind :fn :tokens 3
+          :rationale "Batch execution of multiple S-expression tool calls")
     (:sym :name "outcome-next" :kind :fn :tokens 2
           :rationale "Constructs pipeline outcome passing control to next onion middleware layer")
     (:sym :name "outcome-halt" :kind :fn :tokens 2
