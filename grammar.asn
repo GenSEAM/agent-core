@@ -1,0 +1,157 @@
+;; Package Grammar & Exported Symbol Registry (ASN)
+;; @genseam/asl-agent-core
+(:grammar
+  :package @genseam/asl-agent-core
+  :version "0.1.0"
+  :tokens-baseline 1
+  :symbols [
+    ;; 1-Token Symbols (Baseline)
+    (:sym :name "step" :kind :fn :tokens 1)
+    (:sym :name "AgentMessage" :kind :type :tokens 1)
+    (:sym :name "AgentContext" :kind :type :tokens 1)
+    (:sym :name "ToolDef" :kind :type :tokens 1)
+    (:sym :name "ToolCall" :kind :type :tokens 1)
+    (:sym :name "ToolResult" :kind :type :tokens 1)
+    (:sym :name "ToolArg" :kind :type :tokens 1)
+    (:sym :name "ToolParam" :kind :type :tokens 1)
+    (:sym :name "ToolInvocation" :kind :type :tokens 1)
+    (:sym :name "AgentCompletion" :kind :type :tokens 1)
+    (:sym :name "AgentRegistry" :kind :type :tokens 1)
+    (:sym :name "EventBus" :kind :type :tokens 1)
+    (:sym :name "TaskState" :kind :type :tokens 1)
+    (:sym :name "TaskNode" :kind :type :tokens 1)
+    (:sym :name "TaskDag" :kind :type :tokens 1)
+    (:sym :name "ToolRegistry" :kind :type :tokens 1)
+    (:sym :name "AgentState" :kind :type :tokens 1)
+    (:sym :name "AgentEvent" :kind :type :tokens 1)
+    (:sym :name "MiddlewareOutcome" :kind :type :tokens 1)
+    (:sym :name "Middleware" :kind :type :tokens 1)
+    (:sym :name "MiddlewarePipeline" :kind :type :tokens 1)
+    (:sym :name "Premise" :kind :type :tokens 1)
+    (:sym :name "MiddlewareKind" :kind :type :tokens 1)
+    (:sym :name "OnionContext" :kind :type :tokens 1)
+    (:sym :name "OnionDecision" :kind :type :tokens 1)
+    (:sym :name "OnionPipeline" :kind :type :tokens 1)
+    (:sym :name "TopoState" :kind :type :tokens 1)
+    (:sym :name "PremiseRecord" :kind :type :tokens 1)
+
+    ;; 2-Token Symbols (with :rationale)
+    (:sym :name "make-message" :kind :fn :tokens 2
+          :rationale "Constructs standard AgentMessage record with role, content, and timestamp")
+    (:sym :name "add-message" :kind :fn :tokens 2
+          :rationale "Appends a new message to AgentContext conversation history")
+    (:sym :name "empty-registry" :kind :fn :tokens 2
+          :rationale "Instantiates an empty ToolRegistry instance")
+    (:sym :name "register-tool" :kind :fn :tokens 2
+          :rationale "Registers a tool specification into ToolRegistry")
+    (:sym :name "find-tool" :kind :fn :tokens 2
+          :rationale "Looks up a registered tool definition by name")
+    (:sym :name "has-tool?" :kind :fn :tokens 2
+          :rationale "Predicate testing if tool identifier is present in registry")
+    (:sym :name "format-message" :kind :fn :tokens 2
+          :rationale "Serializes single AgentMessage into structured S-expression frame")
+    (:sym :name "publish-event" :kind :fn :tokens 2
+          :rationale "Dispatches event frame to active bus listeners")
+    (:sym :name "dag-create" :kind :fn :tokens 2
+          :rationale "Initializes empty TaskDag with root generation index")
+    (:sym :name "validate-invocation" :kind :fn :tokens 2
+          :rationale "Validates parameter schema conformance of incoming tool call")
+    (:sym :name "dispatch-call" :kind :fn :tokens 2
+          :rationale "Dispatches validated tool invocation to corresponding execution handler")
+    (:sym :name "outcome-next" :kind :fn :tokens 2
+          :rationale "Constructs pipeline outcome passing control to next onion middleware layer")
+    (:sym :name "outcome-halt" :kind :fn :tokens 2
+          :rationale "Constructs pipeline outcome halting execution with diagnostic payload")
+    (:sym :name "make-pipeline" :kind :fn :tokens 2
+          :rationale "Constructs an empty composable MiddlewarePipeline")
+    (:sym :name "pipeline-execute" :kind :fn :tokens 2
+          :rationale "Executes input context through registered onion middleware stages")
+    (:sym :name "make-premise" :kind :fn :tokens 2
+          :rationale "Instantiates epistemic Premise tracking assumption status")
+    (:sym :name "falsify-premise" :kind :fn :tokens 2
+          :rationale "Marks an active premise as falsified triggering replanning")
+    (:sym :name "format-premise" :kind :fn :tokens 2
+          :rationale "Formats premise record into compact S-expression token")
+    (:sym :name "format-invocation" :kind :fn :tokens 2
+          :rationale "Serializes tool invocation into canonical compact ASN representation")
+    (:sym :name "format-result" :kind :fn :tokens 2
+          :rationale "Serializes tool execution result into canonical compact ASN representation")
+    (:sym :name "strip-quotes" :kind :fn :tokens 2
+          :rationale "Strips enclosing quotes from raw string literals")
+    (:sym :name "parse-tokens" :kind :fn :tokens 2
+          :rationale "Tokenizes raw invocation string into whitespace-separated lexemes")
+    (:sym :name "parse-invocation" :kind :fn :tokens 2
+          :rationale "Parses tool invocation string into structured ToolInvocation record")
+    (:sym :name "make-middleware" :kind :fn :tokens 2
+          :rationale "Constructs a middleware definition with priority and stage")
+    (:sym :name "add-middleware" :kind :fn :tokens 2
+          :rationale "Registers a middleware stage into an OnionPipeline")
+    (:sym :name "sort-pipeline" :kind :fn :tokens 2
+          :rationale "Topologically sorts middleware pipeline stages")
+    (:sym :name "has-prerequisite?" :kind :fn :tokens 2
+          :rationale "Predicate testing if a prerequisite stage is satisfied")
+    (:sym :name "sort-middlewares" :kind :fn :tokens 2
+          :rationale "Sorts middleware list respecting dependency DAG order")
+    (:sym :name "execute-middleware" :kind :fn :tokens 2
+          :rationale "Executes a single middleware layer around next closure")
+    (:sym :name "run-tests" :kind :fn :tokens 2
+          :rationale "Standard test suite runner entrypoint")
+
+    ;; >2 Token Symbols (with :rationale)
+    (:sym :name "make-agent-context" :kind :fn :tokens 3
+          :rationale "Instantiates AgentContext with model parameters and tool registry")
+    (:sym :name "make-tool-def" :kind :fn :tokens 3
+          :rationale "Instantiates ToolDef descriptor with schema and parameter specifications")
+    (:sym :name "make-tool-call" :kind :fn :tokens 3
+          :rationale "Instantiates ToolCall record with arguments map")
+    (:sym :name "make-tool-result" :kind :fn :tokens 3
+          :rationale "Instantiates ToolResult payload with execution status and content")
+    (:sym :name "format-prompt-frame" :kind :fn :tokens 3
+          :rationale "Formats entire context history into bounded prompt representation")
+    (:sym :name "empty-event-bus" :kind :fn :tokens 3
+          :rationale "Constructs empty event bus with clean subscription state")
+    (:sym :name "dag-add-node" :kind :fn :tokens 3
+          :rationale "Inserts new task node with explicit dependency edges into DAG")
+    (:sym :name "dag-find-node" :kind :fn :tokens 3
+          :rationale "Finds task node by unique task identifier in DAG")
+    (:sym :name "dag-is-falsified?" :kind :fn :tokens 3
+          :rationale "Predicate testing if any premise associated with task node has been violated")
+    (:sym :name "dag-falsify-premise" :kind :fn :tokens 3
+          :rationale "Cascades premise falsification across dependent nodes in DAG")
+    (:sym :name "dag-can-activate?" :kind :fn :tokens 3
+          :rationale "Predicate testing if all prerequisite dependency nodes are resolved")
+    (:sym :name "dag-cas-version" :kind :fn :tokens 3
+          :rationale "Compares and swaps DAG optimistic concurrency generation counter")
+    (:sym :name "check-required-params" :kind :fn :tokens 3
+          :rationale "Validates that all mandatory tool parameters are present in invocation")
+    (:sym :name "execute-mock-tool" :kind :fn :tokens 3
+          :rationale "Executes simulated mock tool handler for testing and verification")
+    (:sym :name "is-terminal-state" :kind :fn :tokens 3
+          :rationale "Predicate checking if finite state machine has reached completed terminal state")
+    (:sym :name "outcome-short-circuit" :kind :fn :tokens 3
+          :rationale "Constructs pipeline outcome immediately returning cached or precomputed result")
+    (:sym :name "pipeline-add-stage" :kind :fn :tokens 3
+          :rationale "Appends a middleware stage to execution pipeline")
+    (:sym :name "format-tool-param" :kind :fn :tokens 3
+          :rationale "Formats tool parameter definition into canonical S-expression")
+    (:sym :name "format-tool-def" :kind :fn :tokens 3
+          :rationale "Formats full tool schema definition into canonical S-expression")
+    (:sym :name "get-arg-value" :kind :fn :tokens 3
+          :rationale "Retrieves named argument value from invocation arguments list")
+    (:sym :name "make-onion-context" :kind :fn :tokens 3
+          :rationale "Instantiates OnionContext with initial prompt frame")
+    (:sym :name "has-dep-edge?" :kind :fn :tokens 3
+          :rationale "Predicate testing if dependency edge exists between two middleware layers")
+    (:sym :name "dispatch-tool-call" :kind :fn :tokens 3
+          :rationale "Routes tool invocation to registry handler")
+    (:sym :name "test-dag-create" :kind :fn :tokens 3
+          :rationale "Verifies DAG creation")
+    (:sym :name "test-dag-add-node" :kind :fn :tokens 3
+          :rationale "Verifies node addition to DAG")
+    (:sym :name "test-dag-can-activate" :kind :fn :tokens 3
+          :rationale "Verifies node activation predicate in DAG")
+    (:sym :name "test-dag-falsify-cascading-invalidation" :kind :fn :tokens 5
+          :rationale "Verifies premise falsification cascading in DAG")
+    (:sym :name "test-dag-cas-occ" :kind :fn :tokens 3
+          :rationale "Verifies compare-and-swap optimistic concurrency in DAG")
+  ])
