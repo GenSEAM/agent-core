@@ -1,20 +1,9 @@
 (module asl-core/statemachine
   :d "Deterministic finite state machine transition validator and terminal state predicates."
-  :x [TaskState assert-transition is-terminal-state? valid-transition?]
-  :i [])
+  :x [assert-transition is-terminal-state? valid-transition?]
+  :i [(tasktypes :a tt)])
 
-(dfe TaskState
-  (:c state-queued [] "Task born on disk, awaiting scheduler drain")
-  (:c state-routing [] "Claimed by scheduler, determining route and spec")
-  (:c state-clarification [] "Awaiting external spec clarification")
-  (:c state-ready [] "Spec confirmed and queued for harness execution")
-  (:c state-executing [] "Active execution in harness loop")
-  (:c state-verifying [] "Verification gate inspection")
-  (:c state-done [] "Verified terminal success")
-  (:c state-failed [] "Terminal failure")
-  (:c state-cancelled [] "Cancelled by user or precondition"))
-
-(df is-terminal-state? [(state TaskState)] -> Bool
+(df is-terminal-state? [(state tt/TaskState)] -> Bool
   :d "Evaluates whether a task lifecycle state is terminal (done, failed, or cancelled)."
   (mt state
     ((state-done) true)
@@ -22,7 +11,7 @@
     ((state-cancelled) true)
     (_ false)))
 
-(df valid-transition? [(from TaskState) (to TaskState)] -> Bool
+(df valid-transition? [(from tt/TaskState) (to tt/TaskState)] -> Bool
   :d "Validates legal lifecycle state transitions including reaper recoveries and terminal state locks."
   (mt from
     ((state-queued)
@@ -63,7 +52,7 @@
        (_ false)))
     (_ false)))
 
-(df assert-transition [(from TaskState) (to TaskState)] -> (Result TaskState Str)
+(df assert-transition [(from tt/TaskState) (to tt/TaskState)] -> (Result tt/TaskState Str)
   :d "Enforces valid state transition returning (ok to) or (err message) on violation."
   (if (valid-transition? from to)
     (ok to)

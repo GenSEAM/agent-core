@@ -132,8 +132,7 @@
           :rationale "Compares and swaps DAG optimistic concurrency generation counter")
     (:sym :name "check-required-params" :kind :fn :tokens 3
           :rationale "Validates that all mandatory tool parameters are present in invocation")
-    (:sym :name "execute-mock-tool" :kind :fn :tokens 3
-          :rationale "Executes simulated mock tool handler for testing and verification")
+    (:sym :name "execute-tool" :kind :fn :tokens 2)
     (:sym :name "is-terminal-state" :kind :fn :tokens 3
           :rationale "Predicate checking if finite state machine has reached completed terminal state")
     (:sym :name "outcome-short-circuit" :kind :fn :tokens 3

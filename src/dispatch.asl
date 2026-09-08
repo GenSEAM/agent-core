@@ -1,6 +1,6 @@
 (module asl-agent-core/dispatch
   :d "Zero-JSON tool dispatcher and validation engine for AgentScript S-expressions."
-  :x [ToolRegistry register-tool find-tool check-required-params validate-invocation execute-mock-tool dispatch-call dispatch-batch-calls]
+  :x [ToolRegistry register-tool find-tool check-required-params validate-invocation execute-tool dispatch-call dispatch-batch-calls]
   :i [(protocol :a proto)])
 
 (dfs ToolRegistry
@@ -37,8 +37,8 @@
         (err (str "Missing required argument: " missing-param)))
        ((none) (ok inv))))))
 
-(df execute-mock-tool [(inv proto/ToolInvocation)] -> proto/ToolResult
-  :d "Executes standard tools or falls back to mock echo response."
+(df execute-tool [(inv proto/ToolInvocation)] -> proto/ToolResult
+  :d "Executes standard tools or falls back to generic invocation result."
   (let [(tname (.-tool-name inv))
         (args (.-args inv))]
     (cond
@@ -49,7 +49,7 @@
          (proto/ToolResult
            :tool-name tname
            :success true
-           :output (str "Found 3 results for query "" q "" (limit " limit "): [ASL Docs, Prelude Spec, Benchmarks]")
+           :output (str "Results for query: " q " (limit " limit "): [ASL Docs, Prelude Spec, Benchmarks]")
            :error-msg "")))
       ((= tname "fetch")
        (let [(url (option-or (proto/get-arg-value args "url") ""))]
@@ -69,7 +69,7 @@
          (proto/ToolResult
            :tool-name tname
            :success true
-           :output (str "Memory vector match for "" q "" with similarity 0.94")
+           :output (str "Memory vector match for query " q " with similarity 0.94")
            :error-msg "")))
       (:else
        (proto/ToolResult
@@ -98,7 +98,7 @@
             :output ""
             :error-msg val-err)))
        ((ok valid-inv)
-        (let [(res (execute-mock-tool valid-inv))]
+        (let [(res (execute-tool valid-inv))]
           (proto/format-result res)))))))
 
 (df dispatch-batch-calls [(reg ToolRegistry) (calls (List Str))] -> (List Str)

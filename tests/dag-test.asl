@@ -107,9 +107,10 @@
 
 (df run-tests [] -> Bool
   :d "Runs all Blackboard Task-Premise DAG unit tests."
-  (let [(_t1 (test-dag-create))
-        (_t2 (test-dag-add-node))
-        (_t3 (test-dag-can-activate))
-        (_t4 (test-dag-falsify-cascading-invalidation))
-        (_t5 (test-dag-cas-occ))]
-    true))
+  (and (test-dag-create)
+       (test-dag-add-node)
+       (test-dag-can-activate)
+       (test-dag-falsify-cascading-invalidation)
+       (test-dag-cas-occ)))
+
+(run-tests)

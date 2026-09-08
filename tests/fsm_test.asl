@@ -32,6 +32,7 @@
 
 (df run-tests [] -> Bool
   :d "Runs FSM unit tests"
-  (let [(_t1 (test-fsm-transitions))
-        (_t2 (test-fsm-terminal))]
-    true))
+  (and (test-fsm-transitions)
+       (test-fsm-terminal)))
+
+(run-tests)

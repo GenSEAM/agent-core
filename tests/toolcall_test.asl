@@ -19,20 +19,23 @@
         (p-limit (proto/ToolParam :name "limit" :param-type "I64" :required false :doc "Max count"))
         (tdef (proto/ToolDef :name "search" :doc "Web search" :params (list p-q p-limit)))
         (spec (proto/format-tool-def tdef))]
-    (and (string-contains? spec "(tool :search")
-         (and (string-contains? spec ":q! Str")
-              (string-contains? spec ":limit I64")))))
+    (assert (string-contains? spec "(tool :search") "Tool spec must contain (tool :search")
+    (assert (string-contains? spec ":q! Str") "Tool spec must contain :q! Str")
+    (assert (string-contains? spec ":limit I64") "Tool spec must contain :limit I64")
+    true))
 
 (df test-parse-invocation [] -> Bool
   :d "Verifies S-expression tokenizing and parsing into ToolInvocation."
   (let [(raw "(call :tool search :q \"agentscript language\" :limit 5)")
         (res (proto/parse-invocation raw))]
     (mt res
-      ((err _) false)
+      ((err e) (do (assert false (str "parse-invocation failed: " e)) false))
       ((ok inv)
-       (and (= (.-tool-name inv) "search")
-            (and (= (option-or (proto/get-arg-value (.-args inv) "q") "") "agentscript language")
-                 (= (option-or (proto/get-arg-value (.-args inv) "limit") "") "5")))))))
+       (do
+         (assert (= (.-tool-name inv) "search") "Tool name must equal search")
+         (assert (= (option-or (proto/get-arg-value (.-args inv) "q") "") "agentscript language") "Arg q must match")
+         (assert (= (option-or (proto/get-arg-value (.-args inv) "limit") "") "5") "Arg limit must match 5")
+         true)))))
 
 (df test-validate-invocation [] -> Bool
   :d "Verifies validation of required parameters and unknown tools."
@@ -52,25 +55,30 @@
     (let [(res-valid (disp/validate-invocation reg inv-valid))
           (res-missing (disp/validate-invocation reg inv-missing))
           (res-unknown (disp/validate-invocation reg inv-unknown))]
-      (and (mt res-valid ((ok _) true) ((err _) false))
-           (and (mt res-missing ((ok _) false) ((err msg) (string-contains? msg "Missing required argument: q")))
-                (mt res-unknown ((ok _) false) ((err msg) (string-contains? msg "Unknown tool: non-existent"))))))))
+      (assert (is-ok? res-valid) "Valid invocation must be ok")
+      (assert (is-err? res-missing) "Missing arg invocation must be err")
+      (assert (string-contains? (error-or res-missing "") "Missing required argument: q") "Error msg must cite missing q")
+      (assert (is-err? res-unknown) "Unknown tool invocation must be err")
+      (assert (string-contains? (error-or res-unknown "") "Unknown tool: non-existent") "Error msg must cite unknown tool")
+      true)))
 
 (df test-dispatch-call [] -> Bool
   :d "Verifies end-to-end execution of a valid tool call."
   (let [(reg (sample-registry))
         (raw "(call :tool search :q \"agentscript\" :limit 3)")
         (out (disp/dispatch-call reg raw))]
-    (and (string-contains? out "(result :tool search :ok true")
-         (string-contains? out "agentscript"))))
+    (assert (string-contains? out "(result :tool search :ok true") "Dispatch output must report ok true")
+    (assert (string-contains? out "agentscript") "Dispatch output must include agentscript")
+    true))
 
 (df test-dispatch-error [] -> Bool
   :d "Verifies error response framing on invalid tool call."
   (let [(reg (sample-registry))
         (raw "(call :tool search :limit 5)")
         (out (disp/dispatch-call reg raw))]
-    (and (string-contains? out "(result :tool search :ok false")
-         (string-contains? out "Missing required argument: q"))))
+    (assert (string-contains? out "(result :tool search :ok false") "Dispatch output must report ok false")
+    (assert (string-contains? out "Missing required argument: q") "Dispatch output must cite missing q")
+    true))
 
 (df test-dispatch-batch [] -> Bool
   :d "Verifies batch execution of multiple tool calls."
@@ -78,15 +86,18 @@
         (calls (list "(call :tool search :q \"lang\" :limit 2)"
                      "(call :tool fetch :url \"https://asl.dev\")"))
         (results (disp/dispatch-batch-calls reg calls))]
-    (and (= (list-length results) 2)
-         (and (string-contains? (option-or (list-head results) "") "(result :tool search :ok true")
-              (string-contains? (option-or (list-head (list-tail results)) "") "(result :tool fetch :ok true")))))
+    (assert (= (list-length results) 2) "Batch call must return 2 results")
+    (assert (string-contains? (option-or (list-head results) "") "(result :tool search :ok true") "First batch result must be ok true")
+    (assert (string-contains? (option-or (list-head (list-tail results)) "") "(result :tool fetch :ok true") "Second batch result must be ok true")
+    true))
 
 (df run-tests [] -> Bool
   :d "Runs all asl-toolcall unit tests."
-  (and (test-format-tool-def)
-       (and (test-parse-invocation)
-            (and (test-validate-invocation)
-                 (and (test-dispatch-call)
-                      (and (test-dispatch-error)
-                           (test-dispatch-batch)))))))
+  (do
+    (assert (test-format-tool-def) "test-format-tool-def must pass")
+    (assert (test-parse-invocation) "test-parse-invocation must pass")
+    (assert (test-validate-invocation) "test-validate-invocation must pass")
+    (assert (test-dispatch-call) "test-dispatch-call must pass")
+    (assert (test-dispatch-error) "test-dispatch-error must pass")
+    (assert (test-dispatch-batch) "test-dispatch-batch must pass")
+    true))

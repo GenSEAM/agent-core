@@ -140,6 +140,22 @@
                          remaining))]
     (not (list-empty? prereqs))))
 
+(df pick-candidate-helper [(best (Option Middleware)) (mws (List Middleware))] -> (Option Middleware)
+  (if (list-empty? mws)
+      best
+      (let [(cand (option-or (list-head mws) (make-middleware "" "" (kind-filter) 999999 (list) (list))))
+            (rest (option-or (list-tail mws) (list)))]
+        (mt best
+          ((none) (pick-candidate-helper (some cand) rest))
+          ((some cur)
+           (if (< (.-priority cand) (.-priority cur))
+               (pick-candidate-helper (some cand) rest)
+               (pick-candidate-helper best rest)))))))
+
+(df pick-highest-priority [(candidates (List Middleware))] -> (Option Middleware)
+  :d "Finds the candidate middleware with lowest numeric priority."
+  (pick-candidate-helper (none) candidates))
+
 (df topo-step [(state TopoState) (step I64)] -> TopoState
   :d "Performs one step of topological sort by selecting highest-precedence ready middleware."
   (if (list-empty? (.-remaining state))
@@ -150,15 +166,14 @@
         (let [(candidates (if (list-empty? ready)
                               (.-remaining state)
                               ready))]
-          (let [(sorted-cands (list-sort-by (fn [(m Middleware)] -> I64 (.-priority m)) candidates))]
-            (mt (list-head sorted-cands)
-              ((none) state)
-              ((some chosen)
-               (let [(next-rem (filter (fn [(m Middleware)] -> Bool
-                                         (!= (.-id m) (.-id chosen)))
-                                       (.-remaining state)))
-                     (next-acc (list-append (.-acc state) (list chosen)))]
-                 (TopoState :remaining next-rem :acc next-acc)))))))))
+          (mt (pick-highest-priority candidates)
+            ((none) state)
+            ((some chosen)
+             (let [(next-rem (filter (fn [(m Middleware)] -> Bool
+                                       (!= (.-id m) (.-id chosen)))
+                                     (.-remaining state)))
+                   (next-acc (list-append (.-acc state) (list chosen)))]
+               (TopoState :remaining next-rem :acc next-acc))))))))
 
 (df sort-middlewares [(mws (List Middleware))] -> (List Middleware)
   :d "Topologically sorts middleware list by explicit dependencies with numeric priority resolution."
