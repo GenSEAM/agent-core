@@ -34,8 +34,14 @@
     (:sym :name "OnionPipeline" :kind :type :tokens 1)
     (:sym :name "TopoState" :kind :type :tokens 1)
     (:sym :name "PremiseRecord" :kind :type :tokens 1)
+    (:sym :name "StepContext" :kind :type :tokens 1)
+    (:sym :name "StepDecision" :kind :type :tokens 1)
 
     ;; 2-Token Symbols (with :rationale)
+    (:sym :name "make-step-context" :kind :fn :tokens 2
+          :rationale "Constructs standard StepContext record for step lifecycle execution")
+    (:sym :name "make-step-decision" :kind :fn :tokens 2
+          :rationale "Constructs standard StepDecision record carrying action status")
     (:sym :name "make-message" :kind :fn :tokens 2
           :rationale "Constructs standard AgentMessage record with role, content, and timestamp")
     (:sym :name "add-message" :kind :fn :tokens 2
@@ -146,6 +152,12 @@
           :rationale "Predicate testing if dependency edge exists between two middleware layers")
     (:sym :name "dispatch-tool-call" :kind :fn :tokens 3
           :rationale "Routes tool invocation to registry handler")
+    (:sym :name "dispatch-step-hook" :kind :fn :tokens 3
+          :rationale "Dispatches step context through matching onion pipeline middlewares")
+    (:sym :name "middleware-kind-tag" :kind :fn :tokens 3
+          :rationale "Returns string identifier for MiddlewareKind variant")
+    (:sym :name "middleware-kind-eq?" :kind :fn :tokens 3
+          :rationale "Checks equality between two MiddlewareKind variants")
     (:sym :name "test-dag-create" :kind :fn :tokens 3
           :rationale "Verifies DAG creation")
     (:sym :name "test-dag-add-node" :kind :fn :tokens 3
