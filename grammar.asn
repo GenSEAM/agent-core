@@ -1,7 +1,7 @@
 ;; Package Grammar & Exported Symbol Registry (ASN)
-;; @genseam/asl-agent-core
+;; asl-agent-core
 (:grammar
-  :package @genseam/asl-agent-core
+  :package asl-agent-core
   :version "0.1.0"
   :tokens-baseline 1
   :symbols [
@@ -36,6 +36,8 @@
     (:sym :name "PremiseRecord" :kind :type :tokens 1)
     (:sym :name "StepContext" :kind :type :tokens 1)
     (:sym :name "StepDecision" :kind :type :tokens 1)
+    (:sym :name "TaskKind" :kind :type :tokens 1)
+    (:sym :name "TaskOutcome" :kind :type :tokens 1)
 
     ;; 2-Token Symbols (with :rationale)
     (:sym :name "make-step-context" :kind :fn :tokens 2
@@ -167,4 +169,14 @@
           :rationale "Verifies premise falsification cascading in DAG")
     (:sym :name "test-dag-cas-occ" :kind :fn :tokens 3
           :rationale "Verifies compare-and-swap optimistic concurrency in DAG")
+    (:sym :name "make-task-outcome" :kind :fn :tokens 2
+          :rationale "Constructs typed TaskOutcome record encapsulating execution results")
+    (:sym :name "task-state-in-flight?" :kind :fn :tokens 2
+          :rationale "Predicate testing if task lifecycle state is currently in-flight")
+    (:sym :name "taskstore-list-in-flight" :kind :fn :tokens 2
+          :rationale "Returns all tasks currently in an in-flight lifecycle state")
+    (:sym :name "taskstore-count-by-state" :kind :fn :tokens 2
+          :rationale "Counts number of tasks currently residing in specified state")
+    (:sym :name "taskstore-spawn-children" :kind :fn :tokens 2
+          :rationale "Spawns child tasks from parent task into task store queue")
   ])

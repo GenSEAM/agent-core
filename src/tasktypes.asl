@@ -1,6 +1,6 @@
 (module asl-core/tasktypes
-  :d "Domain representations for task records, lifecycle states, priorities, and scheduler lanes."
-  :x [TaskState TaskPriority TaskRecord TaskLane task-record-create task-lane-create]
+  :d "Domain representations for task records, lifecycle states, priorities, scheduler lanes, and outcome taxonomy."
+  :x [TaskState TaskPriority TaskKind TaskOutcome TaskRecord TaskLane task-record-create task-lane-create make-task-outcome task-state-in-flight?]
   :i [])
 
 (dfe TaskState
@@ -19,6 +19,20 @@
   (:c priority-normal [] "Standard execution priority")
   (:c priority-high [] "Elevated interactive priority")
   (:c priority-urgent [] "Urgent priority bypassing standard queue delay"))
+
+(dfe TaskKind
+  (:c kind-code-mutation [] "Direct source code AST modifications")
+  (:c kind-task-spawn [] "Discovery or planning task spawning child items")
+  (:c kind-audit-verdict [] "Verification audit producing compliance verdict")
+  (:c kind-doc-artifact [] "Architecture or memory ledger documentation update")
+  (:c kind-operational [] "Operational execution or benchmark validation"))
+
+(dfs TaskOutcome
+  (:f kind TaskKind "Outcome taxonomy kind")
+  (:f mutated-paths (List Str) "Files modified during execution")
+  (:f spawned-task-ids (List Str) "Identifiers of dynamically spawned child tasks")
+  (:f artifact-path Str "Path to generated documentation or ADR artifact")
+  (:f receipt Str "Serialized physical execution receipt"))
 
 (dfs TaskRecord
   (:f id Str "Unique task identifier")
@@ -53,3 +67,25 @@
     :id id
     :max-concurrent max-concurrent
     :active-count 0))
+
+(df make-task-outcome [(kind TaskKind) (mutated-paths (List Str)) (spawned-task-ids (List Str)) (artifact-path Str) (receipt Str)] -> TaskOutcome
+  :d "Constructs a typed TaskOutcome record encapsulating execution results."
+  (TaskOutcome
+    :kind kind
+    :mutated-paths mutated-paths
+    :spawned-task-ids spawned-task-ids
+    :artifact-path artifact-path
+    :receipt receipt))
+
+(df task-state-in-flight? [(state TaskState)] -> Bool
+  :d "Determines if a task state represents an active in-flight execution stage."
+  (mt state
+    ((state-routing) true)
+    ((state-clarification) true)
+    ((state-ready) true)
+    ((state-executing) true)
+    ((state-verifying) true)
+    ((state-queued) false)
+    ((state-done) false)
+    ((state-failed) false)
+    ((state-cancelled) false)))

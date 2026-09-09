@@ -4,6 +4,8 @@
       test-taskstore-persistence-and-claims
       test-scheduler-mutual-exclusion-and-fairness
       test-stale-claim-reaper
+      test-task-kinds-and-outcomes
+      test-taskstore-in-flight-tracking-and-spawning
       run-tests]
   :i [(tasktypes :a tt) (statemachine :a sm) (taskstore :a ts) (scheduler :a sc)])
 
@@ -162,11 +164,57 @@
               (assert (= (.-state act-task) (state-routing)) "Active unexpired task must remain in state-routing")
               true)))))))
 
+(df test-task-kinds-and-outcomes [] -> Bool
+  :d "Verifies TaskKind enum variants, TaskOutcome records, and in-flight state detection."
+  (let [(k-mut (tt/kind-code-mutation))
+        (k-spw (tt/kind-task-spawn))
+        (k-aud (tt/kind-audit-verdict))
+        (outcome (tt/make-task-outcome k-mut (list "src/a.asl") (list "c-1") "doc.md" "exit 0"))]
+    (assert (= (list-length (.-mutated-paths outcome)) 1) "Outcome must have 1 mutated path")
+    (assert (= (list-length (.-spawned-task-ids outcome)) 1) "Outcome must have 1 spawned task id")
+    (assert (= (.-artifact-path outcome) "doc.md") "Outcome artifact path must match")
+    (assert (= (.-receipt outcome) "exit 0") "Outcome receipt must match")
+    (assert (tt/task-state-in-flight? (tt/state-routing)) "state-routing must be in-flight")
+    (assert (tt/task-state-in-flight? (tt/state-ready)) "state-ready must be in-flight")
+    (assert (tt/task-state-in-flight? (tt/state-executing)) "state-executing must be in-flight")
+    (assert (tt/task-state-in-flight? (tt/state-verifying)) "state-verifying must be in-flight")
+    (assert (not (tt/task-state-in-flight? (tt/state-queued))) "state-queued must not be in-flight")
+    (assert (not (tt/task-state-in-flight? (tt/state-done))) "state-done must not be in-flight")
+    true))
+
+(df test-taskstore-in-flight-tracking-and-spawning [] -> Bool
+  :d "Verifies in-flight task filtering, state counting, and dynamic child task spawning."
+  (let [(store0 (ts/taskstore-create "/ws/.asl/mem/tasks"))
+        (t1 (tt/task-record-create "task-m1" "lane-1" "/ws" (tt/priority-normal) 100 "cmd-1"))
+        (t2 (tt/task-record-create "task-m2" "lane-1" "/ws" (tt/priority-normal) 200 "cmd-2"))
+        (store1 (result-or (ts/taskstore-put store0 t1) store0))
+        (store2 (result-or (ts/taskstore-put store1 t2) store1))
+        (store-claimed (result-or (ts/taskstore-claim store2 "task-m1") store2))]
+    (assert (= (ts/taskstore-count-by-state store-claimed (tt/state-queued)) 1) "Queued count must be 1")
+    (assert (= (ts/taskstore-count-by-state store-claimed (tt/state-routing)) 1) "Routing count must be 1")
+    (let [(in-flight (ts/taskstore-list-in-flight store-claimed))]
+      (assert (= (list-length in-flight) 1) "In-flight task list count must be 1")
+      (assert (= (.-id (option-or (list-head in-flight) t1)) "task-m1") "In-flight task must be task-m1")
+      (let [(parent t2)
+            (children-payloads (list "child payload 1" "child payload 2"))
+            (store-spawned (ts/taskstore-spawn-children store-claimed parent children-payloads 300))]
+        (assert (= (ts/taskstore-count-by-state store-spawned (tt/state-queued)) 3) "Queued count must be 3 after spawning 2 children")
+        (let [(c1-opt (ts/taskstore-get store-spawned "task-m2-child-1"))
+              (c2-opt (ts/taskstore-get store-spawned "task-m2-child-2"))]
+          (assert (is-some? c1-opt) "Child 1 must be present in store")
+          (assert (is-some? c2-opt) "Child 2 must be present in store")
+          (let [(c1 (option-or c1-opt t1))]
+            (assert (= (.-payload c1) "child payload 1") "Child 1 payload must match")
+            (assert (= (.-state c1) (tt/state-queued)) "Child 1 state must be state-queued")
+            true))))))
+
 (df run-tests [] -> Bool
-  :d "Executes complete test suite for phase 321."
+  :d "Executes complete test suite for phase 321 and holistic task extensions."
   (do
     (assert (test-state-machine) "test-state-machine suite must pass")
     (assert (test-taskstore-persistence-and-claims) "test-taskstore-persistence-and-claims suite must pass")
     (assert (test-scheduler-mutual-exclusion-and-fairness) "test-scheduler-mutual-exclusion-and-fairness suite must pass")
     (assert (test-stale-claim-reaper) "test-stale-claim-reaper suite must pass")
+    (assert (test-task-kinds-and-outcomes) "test-task-kinds-and-outcomes suite must pass")
+    (assert (test-taskstore-in-flight-tracking-and-spawning) "test-taskstore-in-flight-tracking-and-spawning suite must pass")
     true))

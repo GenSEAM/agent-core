@@ -1,4 +1,4 @@
-(:package @genseam/asl-agent-core
+(:package asl-agent-core
  :version "0.1.0"
  :entry "src/core.asl"
  :description "Autonomous AgentScript execution core, onion middleware pipeline and state machine"
