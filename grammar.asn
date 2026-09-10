@@ -179,4 +179,22 @@
           :rationale "Counts number of tasks currently residing in specified state")
     (:sym :name "taskstore-spawn-children" :kind :fn :tokens 2
           :rationale "Spawns child tasks from parent task into task store queue")
+    (:sym :name "MergedTaskNode" :kind :type :tokens 3
+          :rationale "Task node unified from concurrent DAG branches with monotonic state")
+    (:sym :name "DagMergeResult" :kind :type :tokens 3
+          :rationale "Outcome of concurrent DAG splicing with acyclicity verification")
+    (:sym :name "resolve-state-lattice" :kind :fn :tokens 3
+          :rationale "Resolves task states using monotonic join semilattice")
+    (:sym :name "dag-merge-branches" :kind :fn :tokens 3
+          :rationale "Splices concurrent task DAG branches without lock contention")
+    (:sym :name "PromptRadixNode" :kind :type :tokens 3
+          :rationale "Prefix or delta node in prompt context radix tree")
+    (:sym :name "PromptTree" :kind :type :tokens 2
+          :rationale "Copy-on-write prompt prefix radix tree container")
+    (:sym :name "prompt-tree-init" :kind :fn :tokens 3
+          :rationale "Initializes prompt radix tree with shared root prefix")
+    (:sym :name "prompt-tree-branch" :kind :fn :tokens 3
+          :rationale "Attaches subagent delta context to shared prefix")
+    (:sym :name "prompt-tree-assemble" :kind :fn :tokens 3
+          :rationale "Assembles full prompt text and calculates token sharing ratio")
   ])
