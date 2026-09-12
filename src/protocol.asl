@@ -58,8 +58,8 @@
 (df format-result [(res ToolResult)] -> Str
   :d "Formats ToolResult into compact ASL S-expression."
   (if (.-success res)
-      (str "(result :tool " (.-tool-name res) " :ok true :out "" (.-output res) "")")
-      (str "(result :tool " (.-tool-name res) " :ok false :err "" (.-error-msg res) "")")))
+      (str "(result :tool " (.-tool-name res) " :ok true :out \"" (.-output res) "\")")
+      (str "(result :tool " (.-tool-name res) " :ok false :err \"" (.-error-msg res) "\")")))
 
 (df get-arg-value [(args (List ToolArg)) (key Str)] -> (Option Str)
   :d "Finds argument value by key in argument list."

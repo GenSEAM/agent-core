@@ -7,7 +7,7 @@
       test-task-kinds-and-outcomes
       test-taskstore-in-flight-tracking-and-spawning
       run-tests]
-  :i [(tasktypes :a tt) (statemachine :a sm) (taskstore :a ts) (scheduler :a sc)])
+  :i [(tasktypes) (statemachine) (taskstore) (scheduler) (tasktypes :a tt) (statemachine :a sm) (taskstore :a ts) (scheduler :a sc)])
 
 (df test-state-machine [] -> Bool
   :d "Verifies deterministic state machine transitions, terminal state checks, and stage skip rejection."

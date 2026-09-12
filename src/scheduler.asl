@@ -79,7 +79,7 @@
   :d "Checks if a task with the given ID exists in the task list."
   (if (list-empty? tasks)
     false
-    (let [(h (option-or (list-head tasks) (tt/task-record-create "" "" "" (priority-normal) 0 "")))
+    (let [(h (option-or (list-head tasks) (tt/task-record-create "" "" "" (tt/priority-normal) 0 "")))
           (tl (option-or (list-tail tasks) (list)))]
       (if (= (.-id h) id)
         true
@@ -92,7 +92,7 @@
     (let [(sched (.-sched acc))
           (store (.-store acc))
           (claimed (.-claimed acc))
-          (task (option-or (list-head tasks) (tt/task-record-create "" "" "" (priority-normal) 0 "")))
+          (task (option-or (list-head tasks) (tt/task-record-create "" "" "" (tt/priority-normal) 0 "")))
           (rest-tasks (option-or (list-tail tasks) (list)))
           (max-conc (.-max-concurrent (.-config sched)))
           (curr-active (list-length (.-active-projects sched)))
@@ -116,7 +116,7 @@
                                      :id (.-id task)
                                      :lane (.-lane task)
                                      :project-path proj
-                                     :state (state-routing)
+                                     :state (tt/state-routing)
                                      :priority (.-priority task)
                                      :created-at (.-created-at task)
                                      :updated-at (.-updated-at task)
@@ -137,7 +137,7 @@
     (let [(sched (.-sched acc))
           (store (.-store acc))
           (claimed (.-claimed acc))
-          (task (option-or (list-head tasks) (tt/task-record-create "" "" "" (priority-normal) 0 "")))
+          (task (option-or (list-head tasks) (tt/task-record-create "" "" "" (tt/priority-normal) 0 "")))
           (rest-tasks (option-or (list-tail tasks) (list)))
           (max-conc (.-max-concurrent (.-config sched)))
           (curr-active (list-length (.-active-projects sched)))
@@ -161,7 +161,7 @@
                                      :id (.-id task)
                                      :lane (.-lane task)
                                      :project-path proj
-                                     :state (state-routing)
+                                     :state (tt/state-routing)
                                      :priority (.-priority task)
                                      :created-at (.-created-at task)
                                      :updated-at (.-updated-at task)
@@ -203,13 +203,13 @@
       :scheduler sched
       :store store
       :reaped-count reaped-count)
-    (let [(task (option-or (list-head tasks) (tt/task-record-create "" "" "" (priority-normal) 0 "")))
+    (let [(task (option-or (list-head tasks) (tt/task-record-create "" "" "" (tt/priority-normal) 0 "")))
           (rest-tasks (option-or (list-tail tasks) (list)))
           (stale-timeout (.-stale-timeout-ms (.-config sched)))
           (elapsed (- now-ms (.-updated-at task)))
           (is-stale (and (is-reapable-state? (.-state task)) (> elapsed stale-timeout)))]
       (if is-stale
-        (let [(trans-res (ts/taskstore-transition store (.-id task) (state-queued) now-ms))]
+        (let [(trans-res (ts/taskstore-transition store (.-id task) (tt/state-queued) now-ms))]
           (mt trans-res
             ((ok next-store)
              (let [(next-projects (remove-str (.-active-projects sched) (.-project-path task)))
