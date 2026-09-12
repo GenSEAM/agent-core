@@ -169,7 +169,7 @@
   (let [(k-mut (tt/kind-code-mutation))
         (k-spw (tt/kind-task-spawn))
         (k-aud (tt/kind-audit-verdict))
-        (outcome (tt/make-task-outcome k-mut (list "src/a.asl") (list "c-1") "doc.md" "exit 0"))]
+        (outcome (tt/make-task-outcome k-mut (list "src/a.asl") (list "C1") "doc.md" "exit 0"))]
     (assert (= (list-length (.-mutated-paths outcome)) 1) "Outcome must have 1 mutated path")
     (assert (= (list-length (.-spawned-task-ids outcome)) 1) "Outcome must have 1 spawned task id")
     (assert (= (.-artifact-path outcome) "doc.md") "Outcome artifact path must match")

@@ -7,31 +7,8 @@
       parse-numbered-answers
       attach-clarification-answers
       is-clarification-resolved?
-      unblock-clarification-task
-      TaskState
-      TaskRecord]
-  :i [])
-
-(dfe TaskState
-  (:c state-queued [] "Task born on disk, awaiting scheduler drain")
-  (:c state-routing [] "Claimed by scheduler, determining route and spec")
-  (:c state-clarification [] "Awaiting external spec clarification")
-  (:c state-ready [] "Spec confirmed and queued for harness execution")
-  (:c state-executing [] "Active execution in harness loop")
-  (:c state-verifying [] "Verification gate inspection")
-  (:c state-done [] "Verified terminal success")
-  (:c state-failed [] "Terminal failure")
-  (:c state-cancelled [] "Cancelled by user or precondition"))
-
-(dfs TaskRecord
-  (:f id Str "Unique task identifier")
-  (:f lane Str "Conversation or thread lane identifier")
-  (:f project-path Str "Target repository or workspace directory")
-  (:f state TaskState "Current lifecycle state")
-  (:f priority Str "Scheduling priority")
-  (:f created-at I64 "Epoch millisecond timestamp of task creation")
-  (:f updated-at I64 "Epoch millisecond timestamp of latest state update")
-  (:f payload Str "Serialized task specification or instruction payload"))
+      unblock-clarification-task]
+  :i [(tasktypes :a tt)])
 
 (dfs ClarificationQuestion
   (:f index I64 "1-based question sequence index")
@@ -162,7 +139,7 @@
   :d "Returns true when all questions in the clarification session have received answers."
   (.-resolved session))
 
-(df valid-clarification-transition? [(from TaskState) (to TaskState)] -> Bool
+(df valid-clarification-transition? [(from tt/TaskState) (to tt/TaskState)] -> Bool
   :d "Validates legal lifecycle transition from state-clarification to state-routing."
   (mt from
     ((state-clarification)
@@ -171,20 +148,20 @@
        (_ false)))
     (_ false)))
 
-(df assert-clarification-transition [(from TaskState) (to TaskState)] -> (Result TaskState Str)
+(df assert-clarification-transition [(from tt/TaskState) (to tt/TaskState)] -> (Result tt/TaskState Str)
   :d "Enforces valid state transition returning (ok to) or (err message) on violation."
   (if (valid-clarification-transition? from to)
     (ok to)
     (err "Illegal state transition: must transition from state-clarification to state-routing")))
 
-(df unblock-clarification-task [(task TaskRecord) (session ClarificationSession) (now-ms I64)] -> (Result TaskRecord Str)
+(df unblock-clarification-task [(task tt/TaskRecord) (session ClarificationSession) (now-ms I64)] -> (Result tt/TaskRecord Str)
   :d "Unblocks a clarification-waiting task by transitioning to state-routing and embedding answered envelopes."
   (let [(cur-state (.-state task))]
     (mt cur-state
       ((state-clarification)
        (if (not (is-clarification-resolved? session))
          (err "Clarification session is not fully resolved")
-         (let [(trans-res (assert-clarification-transition cur-state (state-routing)))]
+         (let [(trans-res (assert-clarification-transition cur-state (tt/state-routing)))]
            (mt trans-res
              ((ok next-state)
               (let [(envelope (fold (fn [(acc Str) (q ClarificationQuestion)] -> Str
@@ -196,7 +173,7 @@
                                     ""
                                     (.-questions session)))
                     (new-payload (str (.-payload task) "\n[Clarification Envelope]\n" envelope))]
-                (ok (TaskRecord
+                (ok (tt/TaskRecord
                       :id (.-id task)
                       :lane (.-lane task)
                       :project-path (.-project-path task)

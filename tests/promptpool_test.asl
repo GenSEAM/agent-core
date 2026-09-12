@@ -71,7 +71,7 @@
                                :id (.-id t-block)
                                :lane (.-lane t-block)
                                :project-path (.-project-path t-block)
-                               :state (sm/state-clarification)
+                               :state (tt/state-clarification)
                                :priority (.-priority t-block)
                                :created-at (.-created-at t-block)
                                :updated-at 200
@@ -79,7 +79,7 @@
                   (unblock-res (cl/unblock-clarification-task t-clarify sess-full 500))]
               (assert (is-ok? unblock-res) "Unblocking resolved task must succeed with ok")
               (let [(unblocked (result-or unblock-res t-clarify))]
-                (assert (= (.-state unblocked) (sm/state-routing)) "Unblocked task must transition to state-routing")
+                (assert (= (.-state unblocked) (tt/state-routing)) "Unblocked task must transition to state-routing")
                 (assert (string-contains? (.-payload unblocked) "postgres") "Unblocked task payload must contain clarification answer")
                 true))))))))
 

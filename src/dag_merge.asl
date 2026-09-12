@@ -1,6 +1,6 @@
 (module asl-agent-core/dag-merge
   :d "Lock-Free Concurrent Task DAG Splicing and Monotonic Typestate Lattice Engine"
-  :exports [
+  :x [
     MergedTaskNode
     DagMergeResult
     state-to-rank

@@ -44,8 +44,8 @@
 (df test-filter-interceptor [] -> Bool
   :d "Verifies filter middleware passes safe inputs and blocks forbidden payloads."
   (let [(mw (on/make-middleware "mw-guard" "Guard" (on/kind-filter) 200 (list) (list)))
-        (ctx-safe (on/make-onion-context "c-1" "agent-0" "search" "valid query"))
-        (ctx-block (on/make-onion-context "c-2" "agent-0" "delete" "blocked: destructive action"))]
+        (ctx-safe (on/make-onion-context "C1" "agent-0" "search" "valid query"))
+        (ctx-block (on/make-onion-context "C2" "agent-0" "delete" "blocked: destructive action"))]
     (let [(dec-safe (on/execute-middleware mw ctx-safe))
           (dec-block (on/execute-middleware mw ctx-block))]
       (assert (.-proceed dec-safe) "Safe context must proceed")
@@ -58,7 +58,7 @@
 (df test-mutation-interceptor [] -> Bool
   :d "Verifies mutate middleware transforms the context payload."
   (let [(mw (on/make-middleware "mw-transform" "Transformer" (on/kind-mutate) 300 (list) (list)))
-        (ctx (on/make-onion-context "c-3" "agent-1" "transform" "data-raw"))
+        (ctx (on/make-onion-context "C3" "agent-1" "transform" "data-raw"))
         (dec (on/execute-middleware mw ctx))]
     (assert (.-proceed dec) "Mutate middleware must proceed")
     (assert (= (.-payload (.-context dec)) "data-raw:mw-transform") "Payload must be transformed")
@@ -67,7 +67,7 @@
 (df test-audit-interceptor [] -> Bool
   :d "Verifies audit middleware logs telemetry into the context audit log."
   (let [(mw (on/make-middleware "mw-telemetry" "Telemetry" (on/kind-audit) 500 (list) (list)))
-        (ctx (on/make-onion-context "c-4" "agent-2" "tool-test" "payload"))
+        (ctx (on/make-onion-context "C4" "agent-2" "tool-test" "payload"))
         (dec (on/execute-middleware mw ctx))]
     (assert (.-proceed dec) "Audit middleware must proceed")
     (assert (not (list-empty? (.-audit-log (.-context dec)))) "Audit log must not be empty")
@@ -86,7 +86,7 @@
         (p3 (on/add-middleware p2 m-mutate))
         (p4 (on/add-middleware p3 m-filter))
         (p5 (on/add-middleware p4 m-auth))
-        (ctx (on/make-onion-context "c-5" "agent-root" "exec" "command-line"))]
+        (ctx (on/make-onion-context "C5" "agent-root" "exec" "command-line"))]
     (let [(dec (on/dispatch-tool-call p5 ctx "execution-success-42"))]
       (assert (.-proceed dec) "Pipeline dispatch must proceed")
       (assert (not (.-blocked dec)) "Pipeline must not be blocked")

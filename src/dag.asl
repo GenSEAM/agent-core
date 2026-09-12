@@ -1,6 +1,6 @@
 (module asl-core/dag
   :d "Blackboard Task-Premise DAG G=(V,E,P,H) and Optimistic Concurrency Control engine."
-  :x [TaskState
+  :x [DagNodeState
       TaskNode
       TaskDag
       dag-create
@@ -10,9 +10,9 @@
       dag-falsify-premise
       dag-can-activate?
       dag-cas-version]
-  :i [(premise :a p)])
+  :i [(premise :a p) (tasktypes :a tt)])
 
-(dfe TaskState
+(dfe DagNodeState
   (:c task-pending [] "Task is pending execution")
   (:c task-active [] "Task is actively running")
   (:c task-completed [] "Task completed successfully")
@@ -23,7 +23,7 @@
 (dfs TaskNode
   (:f id Str "Unique task identifier")
   (:f title Str "Human-readable task title")
-  (:f state TaskState "Current execution state")
+  (:f state DagNodeState "Current execution state")
   (:f dependencies (List Str) "Identifiers of prerequisite tasks")
   (:f premises (List Str) "Identifiers of truth premises this task depends on"))
 

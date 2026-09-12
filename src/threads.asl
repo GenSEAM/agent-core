@@ -7,9 +7,8 @@
       thread-link-followup
       thread-attach-handoff
       thread-get-parent-brief
-      thread-is-active?
-      TaskRecord]
-  :i [])
+      thread-is-active?]
+  :i [(tasktypes :a tt)])
 
 (dfs ThreadHandoff
   (:f parent-task-id Str "Terminal parent task identifier")
@@ -27,16 +26,6 @@
   (:f active Bool "True if thread is currently open")
   (:f created-at I64 "Creation timestamp")
   (:f updated-at I64 "Last updated timestamp"))
-
-(dfs TaskRecord
-  (:f id Str "Unique task identifier")
-  (:f lane Str "Conversation or thread lane identifier")
-  (:f project-path Str "Target repository or workspace directory")
-  (:f state Str "Current lifecycle state")
-  (:f priority Str "Scheduling priority")
-  (:f created-at I64 "Epoch millisecond timestamp of task creation")
-  (:f updated-at I64 "Epoch millisecond timestamp of latest state update")
-  (:f payload Str "Serialized task specification or instruction payload"))
 
 (df thread-create [(id Str) (lane Str) (root-task-id Str) (now-ms I64)] -> ThreadRecord
   :d "Initializes an active conversational thread bound to a root task."
@@ -77,7 +66,7 @@
     :created-at (.-created-at th)
     :updated-at now-ms))
 
-(df thread-link-followup [(parent-th ThreadRecord) (child-task TaskRecord) (handoff ThreadHandoff) (now-ms I64)] -> (Pair ThreadRecord TaskRecord)
+(df thread-link-followup [(parent-th ThreadRecord) (child-task tt/TaskRecord) (handoff ThreadHandoff) (now-ms I64)] -> (Pair ThreadRecord tt/TaskRecord)
   :d "Links a follow-up child task to parent thread, embedding terminal summary into payload without lane bleed."
   (let [(parent-id (.-parent-task-id handoff))
         (summary (.-terminal-summary handoff))
@@ -95,7 +84,7 @@
         (augmented-payload (if (string-empty? (.-payload child-task))
                              brief-block
                              (str brief-block "\n\n" (.-payload child-task))))
-        (updated-child (TaskRecord
+        (updated-child (tt/TaskRecord
                          :id (.-id child-task)
                          :lane (.-lane parent-th)
                          :project-path (.-project-path child-task)

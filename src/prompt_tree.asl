@@ -1,6 +1,6 @@
 (module asl-agent-core/prompt-tree
   :d "Shared Prompt Context Radix Tree for Copy-on-Write Subagent KV-Cache Optimization"
-  :exports [
+  :x [
     PromptRadixNode
     PromptTree
     AssembledPrompt

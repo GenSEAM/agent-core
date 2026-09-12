@@ -24,10 +24,7 @@
     (:sym :name "ToolRegistry" :kind :type :tokens 1)
     (:sym :name "AgentState" :kind :type :tokens 1)
     (:sym :name "AgentEvent" :kind :type :tokens 1)
-    (:sym :name "MiddlewareOutcome" :kind :type :tokens 1)
     (:sym :name "Middleware" :kind :type :tokens 1)
-    (:sym :name "MiddlewarePipeline" :kind :type :tokens 1)
-    (:sym :name "Premise" :kind :type :tokens 1)
     (:sym :name "MiddlewareKind" :kind :type :tokens 1)
     (:sym :name "OnionContext" :kind :type :tokens 1)
     (:sym :name "OnionDecision" :kind :type :tokens 1)
@@ -68,14 +65,8 @@
           :rationale "Dispatches validated tool invocation to corresponding execution handler")
     (:sym :name "dispatch-batch-calls" :kind :fn :tokens 3
           :rationale "Batch execution of multiple S-expression tool calls")
-    (:sym :name "outcome-next" :kind :fn :tokens 2
-          :rationale "Constructs pipeline outcome passing control to next onion middleware layer")
-    (:sym :name "outcome-halt" :kind :fn :tokens 2
-          :rationale "Constructs pipeline outcome halting execution with diagnostic payload")
     (:sym :name "make-pipeline" :kind :fn :tokens 2
           :rationale "Constructs an empty composable MiddlewarePipeline")
-    (:sym :name "pipeline-execute" :kind :fn :tokens 2
-          :rationale "Executes input context through registered onion middleware stages")
     (:sym :name "make-premise" :kind :fn :tokens 2
           :rationale "Instantiates epistemic Premise tracking assumption status")
     (:sym :name "falsify-premise" :kind :fn :tokens 2
@@ -137,10 +128,6 @@
     (:sym :name "execute-tool" :kind :fn :tokens 2)
     (:sym :name "is-terminal-state" :kind :fn :tokens 3
           :rationale "Predicate checking if finite state machine has reached completed terminal state")
-    (:sym :name "outcome-short-circuit" :kind :fn :tokens 3
-          :rationale "Constructs pipeline outcome immediately returning cached or precomputed result")
-    (:sym :name "pipeline-add-stage" :kind :fn :tokens 3
-          :rationale "Appends a middleware stage to execution pipeline")
     (:sym :name "format-tool-param" :kind :fn :tokens 3
           :rationale "Formats tool parameter definition into canonical S-expression")
     (:sym :name "format-tool-def" :kind :fn :tokens 3
